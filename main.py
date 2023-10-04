@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pygame
 from pygame import Surface
 
@@ -19,13 +17,10 @@ class Game:
             match self.game_status:
                 case GameStatus.MENU:
                     self.menu()
-                case GameStatus.START:
-                    self.start()
                 case GameStatus.GAME:
                     self.game()
                 case GameStatus.END:
-                    print("end")
-                    exit(0)
+                    self.end()
                 case _:
                     print("default")
                     exit(0)
@@ -47,48 +42,32 @@ class Game:
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
-                self.game_status = GameStatus.START
+                self.game_status = GameStatus.GAME
                 break
 
             pygame.display.update()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit(0)
-
-    def start(self):
-        while True:
-            self.screen.fill(Colors.FOREST_WOLF)
-
-            font = pygame.font.Font(pygame.font.get_default_font(), 36)
-
-            title = font.render("СТАРТ", True, Colors.DARK_PURPLE)
-            title_w = title.get_width()
-            title_h = title.get_height()
-            self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))
-
-            self.game_status = GameStatus.GAME
-            break
-
-            # pygame.display.update()
-            # for event in pygame.event.get():
-            #     if event.type == pygame.QUIT:
-            #         pygame.quit()
-            #         exit(0)
+            if pygame.event.get(pygame.QUIT):
+                self.game_status = GameStatus.END
+                break
 
     def game(self):
         place = Place(self.screen)
         while True:
             place.draw()
 
-            pygame.display.update()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit(0)
+            # place.generate_place()
+            # m = place.matrix
+            # print(m)
 
-    def end(self):
-        ...
+            pygame.display.update()
+            if pygame.event.get(pygame.QUIT):
+                self.game_status = GameStatus.END
+                break
+
+    @staticmethod
+    def end():
+        pygame.quit()
+        exit(0)
 
 
 if __name__ == '__main__':
