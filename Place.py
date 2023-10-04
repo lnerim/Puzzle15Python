@@ -3,14 +3,17 @@ from datetime import datetime
 from random import choice
 
 import pygame
-from pygame import Surface
+from pygame import Surface, Rect
 from pygame.sprite import Sprite, Group
 
 from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX
 
 
 class Dice(Sprite):
-    def __init__(self, number: int, row, column, offset_x, offset_y):
+    def __init__(self, number: int,
+                 row: int, column: int,
+                 offset_x: float | int, offset_y: float | int
+                 ):
         super().__init__()
         self.number = number
         self.size = PLACE_SIZE * 0.24
@@ -25,19 +28,27 @@ class Dice(Sprite):
         self.image = pygame.Surface(self.size_dice)
 
         self.image.fill(Colors.BLACK)
-        self.rect = self.image.get_rect()
+
+        font = pygame.font.Font(pygame.font.get_default_font(), 72)
+
+        text_number = font.render(str(number), True, Colors.RED)
+        text_number_w = text_number.get_width() / 2
+        text_number_h = text_number.get_height() / 2
+        self.image.blit(text_number, (self.size / 2 - text_number_w, self.size / 2 - text_number_h))
+
+        self.rect: Rect = self.image.get_rect()
         self.set_locate()
 
     def set_locate(self):
-        self.rect.x = self.offset_x + PLACE_SIZE * (0.005 + 0.25 * self.row)
-        self.rect.y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.column)
+        self.rect.y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.row)
+        self.rect.x = self.offset_x + PLACE_SIZE * (0.005 + 0.25 * self.column)
 
     def move_to(self, row: int, column: int):
         self.row = row
         self.column = column
 
-        pos_x = 0.05 + 0.25 * row
-        pos_y = 0.05 + 0.25 * column
+        pos_y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.row)
+        pos_x = self.offset_x + PLACE_SIZE * (0.005 + 0.25 * self.column)
 
         self.rect.move(pos_x, pos_y)
 
@@ -49,6 +60,8 @@ class Place:
 
         self.time0 = datetime.now()
         self.steps = 0
+
+        self.dices_group: Group[Dice] = Group()
 
         # Игровая матрица пятнашек
         self.matrix: list[list[int]] = deepcopy(INIT_MATRIX)
@@ -83,12 +96,12 @@ class Place:
         dices = []
         for i in range(4):
             for j in range(4):
-                dice: Sprite = Dice(i * 4 + j, i, j, *surface_locate)
-                dices.append(dice)
-        dices.pop()
+                if number := self.matrix[i][j]:
+                    dice: Sprite = Dice(number, i, j, *surface_locate)
+                    dices.append(dice)
 
-        dices_group: Group[Dice] = Group(*dices)
-        dices_group.draw(self.screen)
+        self.dices_group = Group(*dices)
+        self.dices_group.draw(self.screen)
 
     def movable_dice(self) -> tuple[Coordinates]:
         movements: list[Coordinates] = list()
@@ -118,3 +131,20 @@ class Place:
             self.matrix[s_row][s_column], self.matrix[z_row][z_column])
 
         self.zero_coord = Coordinates(s_row, s_column)
+
+    def click(self):
+        pos = pygame.mouse.get_pos()
+        for elem in self.movable_dice():
+            dice: Dice
+            for dice in self.dices_group:
+                if (dice.row == elem.row) and (dice.column == elem.column):
+                    if dice.rect.collidepoint(pos):
+                        self.change_dice(elem)
+                        self.steps += 1
+                        break
+
+    def check_win(self) -> bool:
+        return INIT_MATRIX == self.matrix
+
+    def get_record(self) -> tuple[datetime, int]:
+        return self.time0, self.steps

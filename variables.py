@@ -20,6 +20,7 @@ INIT_MATRIX: list[list[int]] = [
 class GameStatus:
     MENU = "menu"
     GAME = "game"
+    WIN = "win"
     END = "end"
 
 

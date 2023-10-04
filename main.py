@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pygame
 from pygame import Surface
 
@@ -10,6 +12,10 @@ class Game:
         pygame.init()
         self.game_status = GameStatus.MENU
         self.screen: Surface = pygame.display.set_mode((WIDTH, HEIGHT))
+
+        self.time0 = None
+        self.steps = None
+
         pygame.display.set_caption(NAME)
 
     def main_loop(self):
@@ -21,8 +27,9 @@ class Game:
                     self.game()
                 case GameStatus.END:
                     self.end()
+                case GameStatus.WIN:
+                    self.win()
                 case _:
-                    print("default")
                     exit(0)
 
     def menu(self):
@@ -52,12 +59,58 @@ class Game:
 
     def game(self):
         place = Place(self.screen)
+        place.generate_place()
         while True:
             place.draw()
+            if place.check_win():
+                self.game_status = GameStatus.WIN
+                self.time0, self.steps = place.get_record()
+                break
 
-            # place.generate_place()
-            # m = place.matrix
-            # print(m)
+            pygame.display.update()
+            if pygame.event.get(pygame.QUIT):
+                self.game_status = GameStatus.END
+                break
+            elif pygame.event.get(pygame.MOUSEBUTTONUP):
+                place.click()
+
+    def win(self):
+        time_now = datetime.now()
+        while True:
+            self.screen.fill(Colors.FOREST_WOLF)
+
+            font = pygame.font.Font(pygame.font.get_default_font(), 36)
+
+            title = font.render("Пятнашки", True, Colors.DARK_PURPLE)
+            title_w = title.get_width()
+            title_h = title.get_height()
+            self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))
+
+            game_time = time_now - self.time0
+            time_str = f"{game_time.seconds // 60 :02}:{game_time.seconds % 60 :02}"
+            steps = self.steps
+
+            record = font.render(f"Рекорд", True, Colors.DARK_PURPLE)
+            record_w = record.get_width()
+            self.screen.blit(record, ((WIDTH - record_w) / 2, HEIGHT / 2 - 50))
+
+            time_font = font.render(f"Время: {time_str}", True, Colors.DARK_PURPLE)
+            time_font_w = time_font.get_width()
+            self.screen.blit(time_font, ((WIDTH - time_font_w) / 2, HEIGHT / 2))
+
+            steps_font = font.render(f"Ходов: {steps}", True, Colors.DARK_PURPLE)
+            steps_font_w = steps_font.get_width()
+            self.screen.blit(steps_font, ((WIDTH - steps_font_w) / 2, HEIGHT / 2 + 50))
+
+            start_text = font.render(f"Пробел - Заново!", True, Colors.DARK_PURPLE)
+            start_text_w = start_text.get_width() / 2
+            start_text_h = start_text.get_height()
+            self.screen.blit(start_text, (WIDTH / 2 - start_text_w, HEIGHT - start_text_h))
+
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                self.game_status = GameStatus.GAME
+                break
 
             pygame.display.update()
             if pygame.event.get(pygame.QUIT):
