@@ -37,20 +37,8 @@ class Dice(Sprite):
         self.image.blit(text_number, (self.size / 2 - text_number_w, self.size / 2 - text_number_h))
 
         self.rect: Rect = self.image.get_rect()
-        self.set_locate()
-
-    def set_locate(self):
         self.rect.y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.row)
         self.rect.x = self.offset_x + PLACE_SIZE * (0.005 + 0.25 * self.column)
-
-    def move_to(self, row: int, column: int):
-        self.row = row
-        self.column = column
-
-        pos_y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.row)
-        pos_x = self.offset_x + PLACE_SIZE * (0.005 + 0.25 * self.column)
-
-        self.rect.move(pos_x, pos_y)
 
 
 class Place:
@@ -77,11 +65,11 @@ class Place:
         # Время
         game_time = datetime.now() - self.time0
         time_str = f"{game_time.seconds // 60 :02}:{game_time.seconds % 60 :02}"
-        text_time = font.render(f"Время: {time_str}", True, Colors.BLACKBERRY)
+        text_time = font.render(f"Время {time_str}", True, Colors.BLACKBERRY)
         self.screen.blit(text_time, (ind, ind))
 
         # Ходов
-        text_steps = font.render(f"Ходов: {self.steps}", True, Colors.BLACKBERRY)
+        text_steps = font.render(f"Ходов {self.steps}", True, Colors.BLACKBERRY)
         locate_steps = (self.screen.get_width() - text_steps.get_width() - ind, ind)
         self.screen.blit(text_steps, locate_steps)
 
@@ -119,7 +107,7 @@ class Place:
         return tuple(movements)
 
     def generate_place(self):
-        for i in range(1):
+        for i in range(100):
             select: Coordinates = choice(self.movable_dice())
             self.change_dice(select)
 
@@ -139,9 +127,35 @@ class Place:
             for dice in self.dices_group:
                 if (dice.row == elem.row) and (dice.column == elem.column):
                     if dice.rect.collidepoint(pos):
+                        self.anim_move(dice, self.zero_coord)
+
                         self.change_dice(elem)
                         self.steps += 1
                         break
+
+    def anim_move(self, dice: Dice, elem: Coordinates):
+        pos_y = dice.offset_y + PLACE_SIZE * (0.005 + 0.25 * elem.row)
+        pos_x = dice.offset_x + PLACE_SIZE * (0.005 + 0.25 * elem.column)
+
+        h = 5
+
+        h_y = (pos_y - dice.rect.y) / h
+        h_x = (pos_x - dice.rect.x) / h
+
+        for _ in range(h):
+            temp = pygame.Surface(dice.size_dice)
+            temp.fill(Colors.LIGHT_CORAL)
+
+            temp.get_rect().y = dice.rect.y
+            temp.get_rect().x = dice.rect.x
+
+            self.screen.blit(temp, (dice.rect.x, dice.rect.y))
+
+            dice.rect.move_ip(h_x, h_y)
+
+            self.dices_group.draw(self.screen)
+            pygame.display.update()
+            pygame.time.Clock().tick(100)
 
     def check_win(self) -> bool:
         return INIT_MATRIX == self.matrix

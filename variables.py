@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 FONT = r"Zametka Parletter.ttf"
 
@@ -7,7 +8,7 @@ NAME = "Пятнашки"
 WIDTH = 700
 HEIGHT = 740
 
-PLACE_SIZE = min(WIDTH, HEIGHT) * 0.99
+PLACE_SIZE = min(WIDTH, HEIGHT) * 0.985  # Процентов от изначального
 
 # Решение и начальная позиция пятнашек
 INIT_MATRIX: list[list[int]] = [
@@ -18,8 +19,7 @@ INIT_MATRIX: list[list[int]] = [
 ]
 
 
-@dataclass
-class GameStatus:
+class GameStatus(Enum):
     MENU = "menu"
     GAME = "game"
     WIN = "win"

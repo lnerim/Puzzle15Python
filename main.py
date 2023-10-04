@@ -16,6 +16,8 @@ class Game:
         self.time0 = None
         self.steps = None
 
+        self.clock = pygame.time.Clock()
+
         pygame.display.set_caption(NAME)
 
     def main_loop(self):
@@ -31,6 +33,7 @@ class Game:
                     self.win()
                 case _:
                     exit(0)
+            self.clock.tick(100)
 
     def menu(self):
         while True:
@@ -57,6 +60,8 @@ class Game:
                 self.game_status = GameStatus.END
                 break
 
+            self.clock.tick(100)
+
     def game(self):
         place = Place(self.screen)
         place.generate_place()
@@ -73,6 +78,8 @@ class Game:
                 break
             elif pygame.event.get(pygame.MOUSEBUTTONUP):
                 place.click()
+
+            self.clock.tick(100)
 
     def win(self):
         time_now = datetime.now()
@@ -94,11 +101,11 @@ class Game:
             record_w = record.get_width()
             self.screen.blit(record, ((WIDTH - record_w) / 2, HEIGHT / 2 - 50))
 
-            time_font = font.render(f"Время: {time_str}", True, Colors.BLACKBERRY)
+            time_font = font.render(f"Время - {time_str}", True, Colors.BLACKBERRY)
             time_font_w = time_font.get_width()
             self.screen.blit(time_font, ((WIDTH - time_font_w) / 2, HEIGHT / 2))
 
-            steps_font = font.render(f"Ходов: {steps}", True, Colors.BLACKBERRY)
+            steps_font = font.render(f"Ходов - {steps}", True, Colors.BLACKBERRY)
             steps_font_w = steps_font.get_width()
             self.screen.blit(steps_font, ((WIDTH - steps_font_w) / 2, HEIGHT / 2 + 50))
 
@@ -116,6 +123,8 @@ class Game:
             if pygame.event.get(pygame.QUIT):
                 self.game_status = GameStatus.END
                 break
+
+            self.clock.tick(100)
 
     @staticmethod
     def end():
