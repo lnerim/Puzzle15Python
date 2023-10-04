@@ -6,7 +6,7 @@ import pygame
 from pygame import Surface, Rect
 from pygame.sprite import Sprite, Group
 
-from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX
+from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX, FONT
 
 
 class Dice(Sprite):
@@ -27,11 +27,11 @@ class Dice(Sprite):
 
         self.image = pygame.Surface(self.size_dice)
 
-        self.image.fill(Colors.BLACK)
+        self.image.fill(Colors.PINK_PURPLE)
 
-        font = pygame.font.Font(pygame.font.get_default_font(), 72)
+        font = pygame.font.Font(FONT, 72)
 
-        text_number = font.render(str(number), True, Colors.RED)
+        text_number = font.render(str(number), True, Colors.BLACKBERRY)
         text_number_w = text_number.get_width() / 2
         text_number_h = text_number.get_height() / 2
         self.image.blit(text_number, (self.size / 2 - text_number_w, self.size / 2 - text_number_h))
@@ -68,25 +68,25 @@ class Place:
         self.zero_coord = Coordinates(3, 3)
 
     def draw(self):
-        self.screen.fill(Colors.FOREST_WOLF)
+        self.screen.fill(Colors.APRICOT)
 
         ind = 5  # indention - отступ для текста
 
-        font = pygame.font.Font(pygame.font.get_default_font(), 24)
+        font = pygame.font.Font(FONT, 24)
 
         # Время
         game_time = datetime.now() - self.time0
         time_str = f"{game_time.seconds // 60 :02}:{game_time.seconds % 60 :02}"
-        text_time = font.render(f"Время: {time_str}", True, Colors.RED)
+        text_time = font.render(f"Время: {time_str}", True, Colors.BLACKBERRY)
         self.screen.blit(text_time, (ind, ind))
 
         # Ходов
-        text_steps = font.render(f"Ходов: {self.steps}", True, Colors.RED)
+        text_steps = font.render(f"Ходов: {self.steps}", True, Colors.BLACKBERRY)
         locate_steps = (self.screen.get_width() - text_steps.get_width() - ind, ind)
         self.screen.blit(text_steps, locate_steps)
 
         # Игровое поле
-        self.surface.fill(Colors.GREEN)
+        self.surface.fill(Colors.LIGHT_CORAL)
         surface_locate = (
             self.screen.get_width() / 2 - PLACE_SIZE / 2,
             (self.screen.get_height() + text_time.get_height() + ind) / 2 - PLACE_SIZE / 2,
@@ -119,7 +119,7 @@ class Place:
         return tuple(movements)
 
     def generate_place(self):
-        for i in range(100):
+        for i in range(1):
             select: Coordinates = choice(self.movable_dice())
             self.change_dice(select)
 

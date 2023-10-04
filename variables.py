@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+FONT = r"Zametka Parletter.ttf"
+
 NAME = "Пятнашки"
 
 WIDTH = 700
@@ -36,6 +38,12 @@ class Colors:
 
     DARK_PURPLE = (148, 0, 211)
     FOREST_WOLF = (219, 215, 210)
+
+    APRICOT = (255, 205, 178)
+    LIGHT_CORAL = (255, 180, 162)
+    PINK_PURPLE = (229, 152, 155)
+    DULL_PURPLE = (181, 131, 141)
+    BLACKBERRY = (85, 81, 91)
 
 
 @dataclass

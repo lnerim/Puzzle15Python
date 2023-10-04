@@ -34,16 +34,16 @@ class Game:
 
     def menu(self):
         while True:
-            self.screen.fill(Colors.FOREST_WOLF)
+            self.screen.fill(Colors.APRICOT)
 
-            font = pygame.font.Font(pygame.font.get_default_font(), 36)
+            font = pygame.font.Font(FONT, 52)
 
-            title = font.render("Пятнашки", True, Colors.DARK_PURPLE)
+            title = font.render("Пятнашки", True, Colors.BLACKBERRY)
             title_w = title.get_width()
             title_h = title.get_height()
             self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))
 
-            start_text = font.render(f"Пробел - Начать!", True, Colors.DARK_PURPLE)
+            start_text = font.render(f"Пробел - Начать!", True, Colors.BLACKBERRY)
             start_text_w = start_text.get_width() / 2
             self.screen.blit(start_text, (WIDTH / 2 - start_text_w, HEIGHT / 2))
 
@@ -77,11 +77,11 @@ class Game:
     def win(self):
         time_now = datetime.now()
         while True:
-            self.screen.fill(Colors.FOREST_WOLF)
+            self.screen.fill(Colors.APRICOT)
 
-            font = pygame.font.Font(pygame.font.get_default_font(), 36)
+            font = pygame.font.Font(FONT, 36)
 
-            title = font.render("Пятнашки", True, Colors.DARK_PURPLE)
+            title = font.render("Пятнашки", True, Colors.BLACKBERRY)
             title_w = title.get_width()
             title_h = title.get_height()
             self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))
@@ -90,19 +90,19 @@ class Game:
             time_str = f"{game_time.seconds // 60 :02}:{game_time.seconds % 60 :02}"
             steps = self.steps
 
-            record = font.render(f"Рекорд", True, Colors.DARK_PURPLE)
+            record = font.render(f"Рекорд", True, Colors.BLACKBERRY)
             record_w = record.get_width()
             self.screen.blit(record, ((WIDTH - record_w) / 2, HEIGHT / 2 - 50))
 
-            time_font = font.render(f"Время: {time_str}", True, Colors.DARK_PURPLE)
+            time_font = font.render(f"Время: {time_str}", True, Colors.BLACKBERRY)
             time_font_w = time_font.get_width()
             self.screen.blit(time_font, ((WIDTH - time_font_w) / 2, HEIGHT / 2))
 
-            steps_font = font.render(f"Ходов: {steps}", True, Colors.DARK_PURPLE)
+            steps_font = font.render(f"Ходов: {steps}", True, Colors.BLACKBERRY)
             steps_font_w = steps_font.get_width()
             self.screen.blit(steps_font, ((WIDTH - steps_font_w) / 2, HEIGHT / 2 + 50))
 
-            start_text = font.render(f"Пробел - Заново!", True, Colors.DARK_PURPLE)
+            start_text = font.render(f"Пробел - Заново!", True, Colors.BLACKBERRY)
             start_text_w = start_text.get_width() / 2
             start_text_h = start_text.get_height()
             self.screen.blit(start_text, (WIDTH / 2 - start_text_w, HEIGHT - start_text_h))
