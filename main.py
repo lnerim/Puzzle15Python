@@ -39,14 +39,14 @@ class Game:
         while True:
             self.screen.fill(Colors.APRICOT)
 
-            font = pygame.font.Font(FONT, 52)
-
-            title = font.render("Пятнашки", True, Colors.BLACKBERRY)
+            font_title = pygame.font.Font(FONT, 74)
+            title = font_title.render("Пятнашки", True, Colors.BLACKBERRY)
             title_w = title.get_width()
             title_h = title.get_height()
             self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))
 
-            start_text = font.render(f"Пробел - Начать!", True, Colors.BLACKBERRY)
+            font_start = pygame.font.Font(FONT, 48)
+            start_text = font_start.render(f"Пробел - Начать!", True, Colors.BLACKBERRY)
             start_text_w = start_text.get_width() / 2
             self.screen.blit(start_text, (WIDTH / 2 - start_text_w, HEIGHT / 2))
 
@@ -86,9 +86,10 @@ class Game:
         while True:
             self.screen.fill(Colors.APRICOT)
 
+            font_title = pygame.font.Font(FONT, 74)
             font = pygame.font.Font(FONT, 36)
 
-            title = font.render("Пятнашки", True, Colors.BLACKBERRY)
+            title = font_title.render("Пятнашки", True, Colors.BLACKBERRY)
             title_w = title.get_width()
             title_h = title.get_height()
             self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))

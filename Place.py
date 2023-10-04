@@ -127,6 +127,7 @@ class Place:
             for dice in self.dices_group:
                 if (dice.row == elem.row) and (dice.column == elem.column):
                     if dice.rect.collidepoint(pos):
+                        pygame.mixer.Sound("dice.mp3").play()
                         self.anim_move(dice, self.zero_coord)
 
                         self.change_dice(elem)
