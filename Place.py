@@ -12,9 +12,10 @@ from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX, FONT
 class Dice(Sprite):
     def __init__(self, number: int,
                  row: int, column: int,
-                 offset_x: float | int, offset_y: float | int
-                 ):
+                 offset_x: float | int, offset_y: float | int,
+                 image_path: str | None = r"images/i.webp" and None):
         super().__init__()
+
         self.number = number
         self.size = PLACE_SIZE * 0.24
         self.size_dice = (self.size, self.size)
@@ -27,14 +28,30 @@ class Dice(Sprite):
 
         self.image = pygame.Surface(self.size_dice)
 
-        self.image.fill(Colors.PINK_PURPLE)
+        if image_path:
+            img = pygame.image.load(image_path)
 
-        font = pygame.font.Font(FONT, 72)
+            w, h = img.get_width(), img.get_height()
 
-        text_number = font.render(str(number), True, Colors.BLACKBERRY)
-        text_number_w = text_number.get_width() / 2
-        text_number_h = text_number.get_height() / 2
-        self.image.blit(text_number, (self.size / 2 - text_number_w, self.size / 2 - text_number_h))
+            image_row = (self.number - 1) % 4
+            image_column = (self.number - 1) // 4
+
+            cropped_region = (
+                x := self.offset_x + w * (0.005 + 0.25 * image_row),
+                y := self.offset_y + h * (0.005 + 0.25 * image_column),
+                x+0.25*w, y+0.25*h
+            )
+
+            self.image.blit(img, (0, 0), cropped_region)
+
+        else:
+            self.image.fill(Colors.PINK_PURPLE)
+            font = pygame.font.Font(FONT, 72)
+
+            text_number = font.render(str(number), True, Colors.BLACKBERRY)
+            text_number_w = text_number.get_width() / 2
+            text_number_h = text_number.get_height() / 2
+            self.image.blit(text_number, (self.size / 2 - text_number_w, self.size / 2 - text_number_h))
 
         self.rect: Rect = self.image.get_rect()
         self.rect.y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.row)
