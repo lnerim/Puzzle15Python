@@ -5,10 +5,24 @@ FONT = r"Zametka Parletter.ttf"
 
 NAME = "Пятнашки"
 
+SWAP_COUNT = 100
+
 WIDTH = 700
 HEIGHT = 740
 
 PLACE_SIZE = min(WIDTH, HEIGHT) * 0.985  # Процентов от изначального
+
+DICE_PER = 0.24  # Размер кости в процентах
+OFFSET_PER = 0.25  # Размер кости и отступа в процентах
+START_PER = 0.005  # Размер начального отступа в процентах
+
+IND = 5  # indention - отступ для текста
+
+# Расположение Surface с костями
+SURFACE_LOCATE = (
+    WIDTH / 2 - PLACE_SIZE / 2,
+    (HEIGHT + 24 + IND) / 2 - PLACE_SIZE / 2  # Где 24 - размер высоты шрифта времени
+)
 
 # Решение и начальная позиция пятнашек
 INIT_MATRIX: list[list[int]] = [

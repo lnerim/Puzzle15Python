@@ -64,22 +64,8 @@ class Game:
 
     def game(self):
         place = Place(self.screen)
-        place.generate_place()
-        while True:
-            place.draw()
-            if place.check_win():
-                self.game_status = GameStatus.WIN
-                self.time0, self.steps = place.get_record()
-                break
-
-            pygame.display.update()
-            if pygame.event.get(pygame.QUIT):
-                self.game_status = GameStatus.END
-                break
-            elif pygame.event.get(pygame.MOUSEBUTTONUP):
-                place.click()
-
-            self.clock.tick(100)
+        self.game_status = place.game()
+        self.time0, self.steps = place.get_record()
 
     def win(self):
         time_now = datetime.now()

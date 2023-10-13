@@ -6,44 +6,39 @@ import pygame
 from pygame import Surface, Rect
 from pygame.sprite import Sprite, Group
 
-from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX, FONT
+from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX, FONT, SURFACE_LOCATE, IND, GameStatus, START_PER, \
+    OFFSET_PER, DICE_PER, SWAP_COUNT
 
 
 class Dice(Sprite):
-    def __init__(self, number: int,
-                 row: int, column: int,
-                 offset_x: float | int, offset_y: float | int,
-                 image_path: str | None = r"images/i.webp" and None):
+    def __init__(self, number: int, image_path: str | None = None):
         super().__init__()
 
         self.number = number
-        self.size = PLACE_SIZE * 0.24
+        self.size = PLACE_SIZE * DICE_PER
         self.size_dice = (self.size, self.size)
 
-        self.row = row
-        self.column = column
-
-        self.offset_x = offset_x
-        self.offset_y = offset_y
+        self.offset_x, self.offset_y = SURFACE_LOCATE
 
         self.image = pygame.Surface(self.size_dice)
 
         if image_path:
             img = pygame.image.load(image_path)
+            img = pygame.transform.scale(img, (PLACE_SIZE, PLACE_SIZE))
 
             w, h = img.get_width(), img.get_height()
 
+            # Порядковый номер в строку и столбец для фото
             image_row = (self.number - 1) % 4
             image_column = (self.number - 1) // 4
 
             cropped_region = (
-                x := self.offset_x + w * (0.005 + 0.25 * image_row),
-                y := self.offset_y + h * (0.005 + 0.25 * image_column),
-                x+0.25*w, y+0.25*h
+                x := w * (START_PER + OFFSET_PER * image_row),
+                y := h * (START_PER + OFFSET_PER * image_column),
+                x + OFFSET_PER*w, y + OFFSET_PER*h
             )
 
             self.image.blit(img, (0, 0), cropped_region)
-
         else:
             self.image.fill(Colors.PINK_PURPLE)
             font = pygame.font.Font(FONT, 72)
@@ -54,8 +49,6 @@ class Dice(Sprite):
             self.image.blit(text_number, (self.size / 2 - text_number_w, self.size / 2 - text_number_h))
 
         self.rect: Rect = self.image.get_rect()
-        self.rect.y = self.offset_y + PLACE_SIZE * (0.005 + 0.25 * self.row)
-        self.rect.x = self.offset_x + PLACE_SIZE * (0.005 + 0.25 * self.column)
 
 
 class Place:
@@ -72,10 +65,40 @@ class Place:
         self.matrix: list[list[int]] = deepcopy(INIT_MATRIX)
         self.zero_coord = Coordinates(3, 3)
 
-    def draw(self):
-        self.screen.fill(Colors.APRICOT)
+    def game(self) -> GameStatus:
+        self.generate_place()
 
-        ind = 5  # indention - отступ для текста
+        dices = []
+        for i in range(4):
+            for j in range(4):
+                if number := self.matrix[i][j]:  # Все, кроме нуля
+                    dice: Dice = Dice(number)
+
+                    dice.rect.y = dice.offset_y + PLACE_SIZE * (START_PER + OFFSET_PER * i)
+                    dice.rect.x = dice.offset_x + PLACE_SIZE * (START_PER + OFFSET_PER * j)
+
+                    dices.append(dice)
+
+        self.dices_group = Group(*dices)
+
+        while True:
+            self.draw_place()
+
+            if pygame.event.get(pygame.QUIT):
+                return GameStatus.END
+            elif pygame.event.get(pygame.MOUSEBUTTONUP):
+                if self.click():
+                    if self.check_win():
+                        return GameStatus.WIN
+
+            self.dices_group.draw(self.screen)
+
+            pygame.display.update()
+
+            pygame.time.Clock().tick(100)
+
+    def draw_place(self):
+        self.screen.fill(Colors.APRICOT)
 
         font = pygame.font.Font(FONT, 24)
 
@@ -83,30 +106,16 @@ class Place:
         game_time = datetime.now() - self.time0
         time_str = f"{game_time.seconds // 60 :02}:{game_time.seconds % 60 :02}"
         text_time = font.render(f"Время {time_str}", True, Colors.BLACKBERRY)
-        self.screen.blit(text_time, (ind, ind))
+        self.screen.blit(text_time, (IND, IND))
 
         # Ходов
         text_steps = font.render(f"Ходов {self.steps}", True, Colors.BLACKBERRY)
-        locate_steps = (self.screen.get_width() - text_steps.get_width() - ind, ind)
+        locate_steps = (self.screen.get_width() - text_steps.get_width() - IND, IND)
         self.screen.blit(text_steps, locate_steps)
 
         # Игровое поле
         self.surface.fill(Colors.LIGHT_CORAL)
-        surface_locate = (
-            self.screen.get_width() / 2 - PLACE_SIZE / 2,
-            (self.screen.get_height() + text_time.get_height() + ind) / 2 - PLACE_SIZE / 2,
-        )
-        self.screen.blit(self.surface, surface_locate)
-
-        dices = []
-        for i in range(4):
-            for j in range(4):
-                if number := self.matrix[i][j]:
-                    dice: Sprite = Dice(number, i, j, *surface_locate)
-                    dices.append(dice)
-
-        self.dices_group = Group(*dices)
-        self.dices_group.draw(self.screen)
+        self.screen.blit(self.surface, SURFACE_LOCATE)
 
     def movable_dice(self) -> tuple[Coordinates]:
         movements: list[Coordinates] = list()
@@ -124,7 +133,7 @@ class Place:
         return tuple(movements)
 
     def generate_place(self):
-        for i in range(100):
+        for i in range(SWAP_COUNT):
             select: Coordinates = choice(self.movable_dice())
             self.change_dice(select)
 
@@ -137,30 +146,34 @@ class Place:
 
         self.zero_coord = Coordinates(s_row, s_column)
 
-    def click(self):
+    def click(self) -> bool:  # Удачный или нет клик
         pos = pygame.mouse.get_pos()
         for elem in self.movable_dice():
-            dice: Dice
             for dice in self.dices_group:
-                if (dice.row == elem.row) and (dice.column == elem.column):
+                if dice.number == self.matrix[elem.row][elem.column]:
                     if dice.rect.collidepoint(pos):
                         pygame.mixer.Sound("dice.mp3").play()
                         self.anim_move(dice, self.zero_coord)
 
                         self.change_dice(elem)
                         self.steps += 1
-                        break
+
+                        return True
+        return False
 
     def anim_move(self, dice: Dice, elem: Coordinates):
-        pos_y = dice.offset_y + PLACE_SIZE * (0.005 + 0.25 * elem.row)
-        pos_x = dice.offset_x + PLACE_SIZE * (0.005 + 0.25 * elem.column)
+        # Конечные координаты
+        pos_y = dice.offset_y + PLACE_SIZE * (START_PER + OFFSET_PER * elem.row)
+        pos_x = dice.offset_x + PLACE_SIZE * (START_PER + OFFSET_PER * elem.column)
 
-        h = 5
+        h = 5  # Шаг анимации
 
+        # Шаг для каждого направления
         h_y = (pos_y - dice.rect.y) / h
         h_x = (pos_x - dice.rect.x) / h
 
         for _ in range(h):
+            # temp - закрашивает предыдущее положение
             temp = pygame.Surface(dice.size_dice)
             temp.fill(Colors.LIGHT_CORAL)
 
@@ -174,6 +187,9 @@ class Place:
             self.dices_group.draw(self.screen)
             pygame.display.update()
             pygame.time.Clock().tick(100)
+
+        dice.rect.x = pos_x
+        dice.rect.y = pos_y
 
     def check_win(self) -> bool:
         return INIT_MATRIX == self.matrix
