@@ -6,6 +6,7 @@ FONT = r"Zametka Parletter.ttf"
 NAME = "Пятнашки"
 
 PATH_IMAGES = "images"
+PATH_RECORD = "record.txt"
 
 SWAP_COUNT = 100
 
