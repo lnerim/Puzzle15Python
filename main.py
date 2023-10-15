@@ -1,9 +1,12 @@
+import os
 from datetime import datetime
+from random import choice
 
 import pygame
 from pygame import Surface
 
 from Place import Place
+from ui.Button import Button, ButtonGroup, ButtonState
 from variables import *
 
 
@@ -11,6 +14,7 @@ class Game:
     def __init__(self):
         pygame.init()
         self.game_status = GameStatus.MENU
+        self.game_mode: GameMode | None = None
         self.screen: Surface = pygame.display.set_mode((WIDTH, HEIGHT))
 
         self.time0 = None
@@ -26,7 +30,12 @@ class Game:
                 case GameStatus.MENU:
                     self.menu()
                 case GameStatus.GAME:
-                    self.game()
+                    image = None
+                    if self.game_mode == GameMode.IMAGE:
+                        image = self.get_image()
+
+                    self.game(image_path=image)
+                    self.game_mode = None
                 case GameStatus.END:
                     self.end()
                 case GameStatus.WIN:
@@ -36,6 +45,19 @@ class Game:
             self.clock.tick(100)
 
     def menu(self):
+        size_button = (300, 100)
+        position_x = (self.screen.get_width() - size_button[0]) / 2
+        position_y = (self.screen.get_height() - size_button[0]) / 2
+
+        button_normal_mode = Button("Обычный режим", GameMode.NORMAL,
+                                    size_button, (position_x, position_y + 50), 24)
+        button_image_mode = Button("Режим с картинкой", GameMode.IMAGE,
+                                   size_button, (position_x, position_y + 200), 24)
+        if not self.check_images():
+            button_image_mode.state = ButtonState.INACTIVE
+
+        group_buttons = ButtonGroup(button_normal_mode, button_image_mode)
+
         while True:
             self.screen.fill(Colors.APRICOT)
 
@@ -45,14 +67,15 @@ class Game:
             title_h = title.get_height()
             self.screen.blit(title, ((WIDTH - title_w) / 2, title_h + 5))
 
-            font_start = pygame.font.Font(FONT, 48)
-            start_text = font_start.render(f"Пробел - Начать!", True, Colors.BLACKBERRY)
-            start_text_w = start_text.get_width() / 2
-            self.screen.blit(start_text, (WIDTH / 2 - start_text_w, HEIGHT / 2))
+            group_buttons.update()
+            group_buttons.draw(self.screen)
 
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_SPACE]:
+            btn: Button
+            if (btn := group_buttons.get_clicked()) is not None:
                 self.game_status = GameStatus.GAME
+                self.game_mode = btn.click_data
+                pygame.event.clear()
+                pygame.time.delay(200)
                 break
 
             pygame.display.update()
@@ -62,8 +85,8 @@ class Game:
 
             self.clock.tick(100)
 
-    def game(self):
-        place = Place(self.screen)
+    def game(self, *, image_path: str | None):
+        place = Place(self.screen, image_path=image_path)
         self.game_status = place.game()
         self.time0, self.steps = place.get_record()
 
@@ -103,7 +126,7 @@ class Game:
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
-                self.game_status = GameStatus.GAME
+                self.game_status = GameStatus.MENU
                 break
 
             pygame.display.update()
@@ -112,6 +135,16 @@ class Game:
                 break
 
             self.clock.tick(100)
+
+    @staticmethod
+    def check_images() -> bool:
+        if os.path.exists(PATH_IMAGES):
+            return bool(os.listdir(PATH_IMAGES))
+        return False
+
+    def get_image(self):
+        if self.check_images():
+            return PATH_IMAGES + "/" + choice(os.listdir(PATH_IMAGES))
 
     @staticmethod
     def end():

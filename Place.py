@@ -10,8 +10,8 @@ from variables import Colors, PLACE_SIZE, Coordinates, INIT_MATRIX, FONT, SURFAC
     OFFSET_PER, DICE_PER, SWAP_COUNT
 
 
-class Dice(Sprite):
-    def __init__(self, number: int, image_path: str | None = None):
+class Dice(Sprite, Group):
+    def __init__(self, number: int, *, image_path: str | None = None):
         super().__init__()
 
         self.number = number
@@ -52,12 +52,13 @@ class Dice(Sprite):
 
 
 class Place:
-    def __init__(self, screen: Surface):
+    def __init__(self, screen: Surface, *, image_path: str | None):
         self.screen = screen
         self.surface = Surface((PLACE_SIZE, PLACE_SIZE))
 
         self.time0 = datetime.now()
         self.steps = 0
+        self.image_path = image_path
 
         self.dices_group: Group[Dice] = Group()
 
@@ -68,18 +69,15 @@ class Place:
     def game(self) -> GameStatus:
         self.generate_place()
 
-        dices = []
         for i in range(4):
             for j in range(4):
                 if number := self.matrix[i][j]:  # Все, кроме нуля
-                    dice: Dice = Dice(number)
+                    dice: Dice = Dice(number, image_path=self.image_path)
 
                     dice.rect.y = dice.offset_y + PLACE_SIZE * (START_PER + OFFSET_PER * i)
                     dice.rect.x = dice.offset_x + PLACE_SIZE * (START_PER + OFFSET_PER * j)
 
-                    dices.append(dice)
-
-        self.dices_group = Group(*dices)
+                    self.dices_group.add(dice)
 
         while True:
             self.draw_place()

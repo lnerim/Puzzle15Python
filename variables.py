@@ -5,6 +5,8 @@ FONT = r"Zametka Parletter.ttf"
 
 NAME = "Пятнашки"
 
+PATH_IMAGES = "images"
+
 SWAP_COUNT = 100
 
 WIDTH = 700
@@ -56,6 +58,8 @@ class Colors:
     APRICOT = (255, 205, 178)
     LIGHT_CORAL = (255, 180, 162)
     PINK_PURPLE = (229, 152, 155)
+    PINK_PURPLE_DARK = (222, 145, 148)
+    PINK_PURPLE_BLACK = (159, 82, 85)
     DULL_PURPLE = (181, 131, 141)
     BLACKBERRY = (85, 81, 91)
 
@@ -84,3 +88,8 @@ class Coordinates:
         row = self.row
         column = self.column + 1
         return Coordinates(row, column)
+
+
+class GameMode(Enum):
+    NORMAL = "normal"
+    IMAGE = "image"
