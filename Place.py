@@ -82,8 +82,13 @@ class Place:
         while True:
             self.draw_place()
 
+            if self.click_keyboard():
+                if self.check_win():
+                    return GameStatus.WIN
+
             if pygame.event.get(pygame.QUIT):
                 return GameStatus.END
+
             elif pygame.event.get(pygame.MOUSEBUTTONUP):
                 if self.click():
                     if self.check_win():
@@ -158,6 +163,30 @@ class Place:
 
                         return True
         return False
+
+    def click_keyboard(self) -> bool:
+        if pygame.key.get_pressed()[97]:  # A
+            coord_to_move = self.zero_coord.right()
+        elif pygame.key.get_pressed()[100]:  # D
+            coord_to_move = self.zero_coord.left()
+        elif pygame.key.get_pressed()[119]:  # W
+            coord_to_move = self.zero_coord.down()
+        elif pygame.key.get_pressed()[115]:  # S
+            coord_to_move = self.zero_coord.up()
+        else:
+            return False
+
+        if coord_to_move in self.movable_dice():
+            for dice in self.dices_group:
+                if dice.number == self.matrix[coord_to_move.row][coord_to_move.column]:
+                    pygame.mixer.Sound("dice.mp3").play()
+                    self.anim_move(dice, self.zero_coord)
+
+                    self.change_dice(coord_to_move)
+                    self.steps += 1
+
+        pygame.time.delay(150)
+        return True
 
     def anim_move(self, dice: Dice, elem: Coordinates):
         # Конечные координаты

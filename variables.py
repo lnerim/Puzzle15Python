@@ -8,7 +8,7 @@ NAME = "Пятнашки"
 PATH_IMAGES = "images"
 PATH_RECORD = "record.txt"
 
-SWAP_COUNT = 100
+SWAP_COUNT = 1000
 
 WIDTH = 700
 HEIGHT = 740
